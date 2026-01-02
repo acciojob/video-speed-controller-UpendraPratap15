@@ -1,19 +1,19 @@
-// Wait for the DOM to be fully loaded
+// Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
   // Get the video element (the existing .flex video)
   const video = document.querySelector('video.flex');
-  // Get the progress bar element
+  // Get the progress bar
   const progressBar = document.querySelector('.progress__filled');
-  // Get the play/pause toggle button (assuming it has class player__button)
+  // Get the play/pause toggle button
   const toggle = document.querySelector('.player__button');
   // Get volume and playback speed sliders
   const volume = document.querySelector('input[name="volume"]');
   const playbackSpeed = document.querySelector('input[name="playbackRate"]');
-  // Get the « 10s and 25s » buttons (assuming they have classes rewind and skip)
+  // Get the « 10s and 25s » buttons
   const rewindBtn = document.querySelector('.rewind');
   const skipBtn = document.querySelector('.skip');
 
-  // If video not found, exit (Cypress will fail anyway)
+  // If video not found, exit early
   if (!video) return;
 
   // Change video source to the required one
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Update progress bar
   function updateProgress() {
-    if (progressBar) {
+    if (progressBar && !isNaN(video.duration)) {
       const percent = (video.currentTime / video.duration) * 100;
       progressBar.style.flexBasis = `${percent}%`;
     }
