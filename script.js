@@ -1,20 +1,20 @@
-// Wait for DOM to be fully loaded
+// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // Get the video and controls
-  const video = document.querySelector('video');
-  const progress = document.querySelector('.progress');
+  // Get the video element (the existing .flex video)
+  const video = document.querySelector('video.flex');
+  // Get the progress bar element
   const progressBar = document.querySelector('.progress__filled');
+  // Get the play/pause toggle button (assuming it has class player__button)
   const toggle = document.querySelector('.player__button');
+  // Get volume and playback speed sliders
   const volume = document.querySelector('input[name="volume"]');
   const playbackSpeed = document.querySelector('input[name="playbackRate"]');
-  const rewindBtn = document.querySelector('.rewind'); // « 10s
-  const skipBtn = document.querySelector('.skip');     // 25s »
+  // Get the « 10s and 25s » buttons (assuming they have classes rewind and skip)
+  const rewindBtn = document.querySelector('.rewind');
+  const skipBtn = document.querySelector('.skip');
 
-  // If any element is missing, exit early
-  if (!video || !progress || !progressBar || !toggle) {
-    console.error('Required video or progress elements not found');
-    return;
-  }
+  // If video not found, exit (Cypress will fail anyway)
+  if (!video) return;
 
   // Change video source to the required one
   video.src = 'https://www.w3schools.com/html/mov_bbb.mp4';
@@ -30,13 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Update play/pause button text
   function updateButton() {
-    toggle.textContent = video.paused ? '►' : '❚ ❚';
+    if (toggle) {
+      toggle.textContent = video.paused ? '►' : '❚ ❚';
+    }
   }
 
   // Update progress bar
-  function handleProgress() {
-    const percent = (video.currentTime / video.duration) * 100;
-    progressBar.style.flexBasis = `${percent}%`;
+  function updateProgress() {
+    if (progressBar) {
+      const percent = (video.currentTime / video.duration) * 100;
+      progressBar.style.flexBasis = `${percent}%`;
+    }
   }
 
   // Rewind 10 seconds
@@ -55,12 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Event listeners
-  video.addEventListener('click', togglePlay);
   video.addEventListener('play', updateButton);
   video.addEventListener('pause', updateButton);
-  video.addEventListener('timeupdate', handleProgress);
+  video.addEventListener('timeupdate', updateProgress);
 
-  toggle.addEventListener('click', togglePlay);
+  if (toggle) {
+    toggle.addEventListener('click', togglePlay);
+  }
 
   if (rewindBtn) {
     rewindBtn.addEventListener('click', rewind);
@@ -76,21 +81,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (playbackSpeed) {
     playbackSpeed.addEventListener('input', handleSlider);
-  }
-
-  // Progress bar scrubbing (click/drag to seek)
-  let mousedown = false;
-  function scrub(e) {
-    if (mousedown) {
-      const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
-      video.currentTime = scrubTime;
-    }
-  }
-
-  if (progress && progressBar) {
-    progress.addEventListener('click', scrub);
-    progress.addEventListener('mousemove', (e) => mousedown && scrub(e));
-    progress.addEventListener('mousedown', () => mousedown = true);
-    progress.addEventListener('mouseup', () => mousedown = false);
   }
 });
