@@ -1,37 +1,15 @@
-// script.js
+// Get elements
+const player = document.querySelector('.player');
+const video = player.querySelector('.player__video');
+const progress = player.querySelector('.progress');
+const progressBar = player.querySelector('.progress__filled');
+const toggle = player.querySelector('.toggle');
+const rewindBtn = player.querySelector('.rewind');
+const forwardBtn = player.querySelector('.forward');
+const volumeInput = player.querySelector('input[name="volume"]');
+const speedInput = player.querySelector('input[name="playbackSpeed"]');
 
-// Select elements
-const player = document.querySelector('.wrapper');
-const video = player.querySelector('video');
-
-// Change video source as required
-video.src = 'https://www.w3schools.com/html/mov_bbb.mp4';  // Big Buck Bunny [web:6][web:15]
-
-// Create controls container
-const controls = document.createElement('div');
-controls.classList.add('player__controls');
-controls.innerHTML = `
-  <button class="player__button toggle" title="Toggle Play">►</button>
-  <button class="player__button skip" data-skip="-10">« 10s</button>
-  <button class="player__button skip" data-skip="25">25s »</button>
-
-  <input type="range" name="volume" class="player__slider" min="0" max="1" step="0.05" value="1">
-  <input type="range" name="playbackRate" class="player__slider" min="0.25" max="2" step="0.25" value="1">
-
-  <div class="progress">
-    <div class="progress__filled"></div>
-  </div>
-`;
-player.appendChild(controls);
-
-// Hook up JS
-const toggle = controls.querySelector('.toggle');
-const skipButtons = controls.querySelectorAll('[data-skip]');
-const ranges = controls.querySelectorAll('.player__slider');
-const progress = controls.querySelector('.progress');
-const progressBar = controls.querySelector('.progress__filled');
-
-// Play / Pause toggle
+// Play / pause
 function togglePlay() {
   if (video.paused) {
     video.play();
@@ -40,31 +18,41 @@ function togglePlay() {
   }
 }
 
-// Update play / pause button icon
+// Update button icon ► / ❚ ❚
 function updateButton() {
   toggle.textContent = video.paused ? '►' : '❚ ❚';
 }
 
-// Update volume and playbackRate
-function handleRangeUpdate() {
-  video[this.name] = parseFloat(this.value);
-}
-
-// Skip forward / backward
-function skip() {
-  video.currentTime += parseFloat(this.dataset.skip);
-}
-
-// Update progress bar as video plays
+// Update progress bar
 function handleProgress() {
   const percent = (video.currentTime / video.duration) * 100;
   progressBar.style.flexBasis = `${percent}%`;
 }
 
-// Scrub video when clicking / dragging on progress bar
+// Scrub via progress bar
 function scrub(e) {
   const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
   video.currentTime = scrubTime;
+}
+
+// Volume control
+function handleVolume() {
+  video.volume = parseFloat(this.value);
+}
+
+// Playback speed control
+function handleSpeed() {
+  video.playbackRate = parseFloat(this.value);
+}
+
+// Rewind 10s
+function handleRewind() {
+  video.currentTime = Math.max(0, video.currentTime - 10);
+}
+
+// Forward 25s
+function handleForward() {
+  video.currentTime = Math.min(video.duration, video.currentTime + 25);
 }
 
 // Event listeners
@@ -75,12 +63,15 @@ video.addEventListener('play', updateButton);
 video.addEventListener('pause', updateButton);
 video.addEventListener('timeupdate', handleProgress);
 
-skipButtons.forEach(btn => btn.addEventListener('click', skip));
-ranges.forEach(range => range.addEventListener('input', handleRangeUpdate));
-
-// Progress bar scrubbing
-let mousedown = false;
 progress.addEventListener('click', scrub);
+
+let mousedown = false;
+progress.addEventListener('mousedown', () => (mousedown = true));
+progress.addEventListener('mouseup', () => (mousedown = false));
 progress.addEventListener('mousemove', (e) => mousedown && scrub(e));
-progress.addEventListener('mousedown', () => mousedown = true);
-progress.addEventListener('mouseup', () => mousedown = false);
+
+volumeInput.addEventListener('input', handleVolume);
+speedInput.addEventListener('input', handleSpeed);
+
+rewindBtn.addEventListener('click', handleRewind);
+forwardBtn.addEventListener('click', handleForward);
